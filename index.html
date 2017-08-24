@@ -3,15 +3,19 @@
 cat <<EOF > .git/hooks/pre-commit
 #!/bin/sh
 
-echo
-touch .commit
+echo;
 
 composer run fix-style;
 
-nvm use >/dev/null 2>&1;
-npm run production;
+if [[ ! -z \$(git diff --cached --name-only | grep "resources/assets") ]]
+then
+	touch .commit;
+	
+    nvm use >/dev/null 2>&1;
+    npm run production;
+fi
 
-exit
+exit;
 EOF
 
 chmod +x .git/hooks/pre-commit;
@@ -20,28 +24,30 @@ chmod +x .git/hooks/pre-commit;
 cat <<EOF > .git/hooks/post-commit
 #!/bin/sh
 
-echo
+echo;
+
 if [ -a .commit ]
-    then
-    rm .commit
+then
+	rm .commit;
 
-    git add ./public;
+	git add ./public;
 
-    git commit --amend -C HEAD --no-verify
+	git commit --amend -C HEAD --no-verify;
 fi
-exit
+
+exit;
 EOF
 
 chmod +x .git/hooks/post-commit;
 
 if [ ! -f "./.gitignore" ]
 then
-    touch ./.gitignore
+    touch ./.gitignore;
 fi
 
 if grep -Fxq ".commit" .gitignore
 then
-    echo ".gitignore has \".commit\""
+    echo ".gitignore has \".commit\"";
 else
-    echo "\n.commit\n" >> ./.gitignore
+    echo "\n.commit\n" >> ./.gitignore;
 fi
